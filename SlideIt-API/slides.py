@@ -301,7 +301,8 @@ def downloadFromDrive(filename):
 
         if done:
             # write file as pdf
-            with open(f'{filename}.pdf', 'wb') as f:
+            # with open(f'presentation_pdfs/{filename}.pdf', 'wb') as f:
+            with open(f'presentation_pdfs/slides.pdf', 'wb') as f:
                 f.write(file.getvalue())
 
     except HttpError as error:
