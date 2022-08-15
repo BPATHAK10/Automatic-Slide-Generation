@@ -1,6 +1,6 @@
-# slideit
-Clone the repository
-Its always wise to first create a virtual environment
-Then `pip install -r requirements.txt`
+# slideit-backend
+Clone the repository \n
+Its always wise to first create a virtual environment \n
+Then `pip install -r requirements.txt` \n
 Finally hit `python main.py` and run the api
 
