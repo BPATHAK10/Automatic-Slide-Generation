@@ -2,7 +2,7 @@ from flask import Flask, render_template, url_for, request
 # import pandas as pd
 import pickle
 import slidegen as slidegen # gslides\slides.py
-import model.pipeline as pipeline # model\pipeline.py
+# import model.pipeline as pipeline # model\pipeline.py
 
 import json
 from flask import jsonify
@@ -28,8 +28,25 @@ def predict():
 		request_data = json.loads(request.data.decode('utf-8'))
 		raw_data = request_data['data']
 
-		selected_sentences = pipeline.summarize(raw_data)
-		print(selected_sentences)
+		# selected_sentences = pipeline.summarize(raw_data)
+
+		selected_sentences = {
+			0: ["After Tesla and SpaceX CEO Elon Musk took ownership of Twitter last week, the social networking giant embarked on a steep reduction in its workforce.", 
+					"The cuts affected a total of 983 employees in California, its home state, according to three letters of notice that the company sent to regional authorities, which were obtained by CNBC.",
+					"The company’s new owner, CEO and sole director Musk, wrote in a tweet on Friday afternoon, “Regarding Twitter’s reduction in force, unfortunately there is no choice when the company is losing over $4M/day.",
+					"Everyone exited was offered 3 months of severance, which is 50% more than legally required.”"
+					],
+			1: ["The cuts affected a total of 983 employees in California, its home state, according to three letters of notice that the company sent to regional authorities, which were obtained by CNBC.",
+					"The company’s new owner, CEO and sole director Musk, wrote in a tweet on Friday afternoon",
+					"Everyone exited was offered 3 months of severance, which is 50% more than legally required.”",
+					"Twitter’s reduction in force extended beyond California, and CNBC could not immediately confirm whether Musk’s description is accurate."
+					],
+			2: ["The company’s new owner, CEO and sole director Musk, wrote in a tweet on Friday afternoon, “Regarding Twitter’s reduction in force, unfortunately there is no choice when the company is losing over $4M/day.",
+					"Everyone exited was offered 3 months of severance, which is 50% more than legally required.",
+					"Twitter’s reduction in force extended beyond California, and CNBC could not immediately confirm whether Musk’s description is accurate."],
+		}
+
+		# print(selected_sentences)
 		presentationContent = {
 			"title": "Our first slide",
 			"subtitle": "This is our first slide",
