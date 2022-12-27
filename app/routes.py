@@ -1,9 +1,8 @@
 from flask import Flask, render_template, url_for, request
 # import pandas as pd
-import pickle
 import slidegen as slidegen
 import model.pipeline as pipeline # model\pipeline.py
-# import videogen as videogen
+import videogen as videogen
 
 
 import json
@@ -49,14 +48,15 @@ def predict():
 		# }
 
 		presentationContent = {
-			"title": "Our first slide",
-			"subtitle": "This is our first slide",
+			"title": "The Home Title Page",
+			"subtitle": "This area denotes the subtitle of the topic",
 			"slides": slides_with_sentences,
 		}
-		
-		slidegen.generateSlides(presentationContent)
 
-		return jsonify({'message': "you now get the slides pdf"})
+		slidegen.generateSlides(presentationContent)
+		videogen.generate_video(presentationContent)
+		
+		return jsonify({'message': "you now get the pdf and output video"})
 
 	if request.method == 'GET':
 		return jsonify({'message': 'Please use the POST method'})	

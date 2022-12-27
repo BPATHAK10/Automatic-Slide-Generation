@@ -1,53 +1,53 @@
 import os
 import tempfile
-import argparse
 from subprocess import call
 
 from pdf2image import convert_from_path
 from gtts import gTTS
 
-
 __author__ = ['slideit']
 
-
 ## Sometimes ffmpeg is avconv
-# FFMPEG_NAME = 'ffmpeg'
-FFMPEG_NAME = 'avconv'
+FFMPEG_NAME = 'ffmpeg'
+# FFMPEG_NAME = 'avconv'
+pdf_path = "slidev/slides-export.pdf"
+output_path = "output.mp4"
 
+def generate_video(content):
+    temp_path = tempfile.TemporaryDirectory()
+    images_from_path = convert_from_path(pdf_path)
+    for i, image in enumerate(images_from_path):
+        image_path = os.path.join(temp_path, 'frame_{}.jpg'.format(i))
+        audio_path = os.path.join(temp_path, 'frame_{}.mp3'.format(i))
+        image.save(image_path)
+        if (i==0):
+            #The empty spaces for pause
+            speaker_notes = content["title"] + '      ' + content["subtitle"]
+        else:
+            speaker_notes = ' '.join(content["selected_sentences"][i-1])
 
-def generate_video_from_images(fps=24, bitrate='5000k'):
-    """
-    Generates a video from a list of images.
+        generate_audio_from_text(speaker_notes, audio_path)
+        generate_video_from_image(image_path, audio_path, temp_path, i)
 
-    :param images: List of images to use in the video.
-    :type images: list
-    :param output_file: Path to the output video file.
-    :type output_file: str
-    :param fps: Frames per second of the output video.
-    :type fps: int
-    :param bitrate: Bitrate of the output video.
-    :type bitrate: str
-    """
-    # Create a temporary directory to store the images
-    temp_dir = tempfile.mkdtemp()
+    video_list = [os.path.join(temp_path, 'frame_{}.ts'.format(i)) \
+                    for i in range(len(images_from_path))]
+    video_list_str = 'concat:' + '|'.join(video_list)
+    ffmpeg_concat(video_list_str, output_path)
 
-    # Save the images to the temporary directory
-    images = convert_from_path('slidev/slides-export.pdf', output_folder=temp_dir, fmt='png', dpi=300)
-    for i, image in enumerate(images):
-        image.save(os.path.join(temp_dir, 'image%05d.png' % i))
+def ffmpeg_concat(video_list_str, out_path):
+    call([FFMPEG_NAME, '-y', '-f', 'mpegts', '-i', '{}'.format(video_list_str),
+          '-c', 'copy', '-bsf:a', 'aac_adtstoasc', out_path])
 
-    # Generate the video from the images
-    call([
-        FFMPEG_NAME,
-        '-y',
-        '-r', str(fps),
-        '-i', os.path.join(temp_dir, 'image%05d.png'),
-        '-vcodec', 'libx264',
-        '-crf', '25',
-        '-pix_fmt', 'yuv420p',
-        '-b', bitrate,
-        output_file
-    ])
+def generate_audio_from_text(text, output_path):
+    tts = gTTS(text=text, lang='en')
+    tts.save(output_path)
 
-    # Remove the temporary directory
-    os.rmdir(temp_dir)
+def generate_video_from_image(image_path, audio_path, temp_path, i):
+    out_path_mp4 = os.path.join(temp_path, 'frame_{}.mp4'.format(i))
+    out_path_ts = os.path.join(temp_path, 'frame_{}.ts'.format(i))
+    call([FFMPEG_NAME, '-loop', '1', '-y', '-i', image_path, '-i', audio_path,
+          '-c:v', 'libx264', '-tune', 'stillimage', '-c:a', 'aac',
+          '-b:a', '192k', '-pix_fmt', 'yuv420p', '-shortest', out_path_mp4])
+    call([FFMPEG_NAME, '-y', '-i', out_path_mp4, '-c', 'copy',
+          '-bsf:v', 'h264_mp4toannexb', '-f', 'mpegts', out_path_ts])
+    
