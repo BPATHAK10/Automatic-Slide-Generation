@@ -65,7 +65,7 @@ def abstractive_sum(text):
     summaries = model.generate(
         input_ids=input_ids['input_ids'],
         attention_mask=input_ids['attention_mask'],
-        max_length=512
+        max_length=512,
         min_length=256
     )
     decoded_summaries = [tokenizer.decode(s, skip_special_tokens=True, clean_up_tokenization_spaces=True) for s in summaries]
