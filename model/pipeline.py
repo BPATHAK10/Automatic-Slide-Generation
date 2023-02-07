@@ -1,6 +1,6 @@
 import nltk
 nltk.download('punkt')
-from nltk import sent_tokenize
+from nltk import sent_tokenize, word_tokenize
 import math
 
 from model.config import *
@@ -15,14 +15,6 @@ def create_attention_mask(input_ids):
     att_mask = [int(token_id > 0) for token_id in sent]  # create a list of 0 and 1.
     attention_masks.append(att_mask)  # basically attention_masks is a list of list
   return attention_masks
-
-def return_clusters(sentence_features, number_extract):
-    kmeans = KMeans(n_clusters=number_extract, random_state=0).fit(sentence_features)
-    cluster_centers = kmeans.cluster_centers_
-    nbrs = NearestNeighbors(n_neighbors= 1,algorithm='brute').fit(sentence_features)
-    distances, indices = nbrs.kneighbors(cluster_centers.reshape(number_extract,-1))
-    indices = np.sort(indices.reshape(1,-1))
-    return indices[0]
 
 def extractive_sum(text):
     # Extractive summarization
@@ -48,10 +40,32 @@ def extractive_sum(text):
     encoder_output = outputs.encoder_last_hidden_state
     sentence_features = encoder_output[:,0,:].detach().numpy()
 
-    topic_answer = []
-    for i in return_clusters(sentence_features, 15):
-        topic_answer.append(paragraph_split[i])
+    paragraph_split = sent_tokenize(text)
+    sent_count = len(paragraph_split)
 
+    topic_answer = []
+    word_count = len(word_tokenize(text))
+
+    number_extract = 14 #default value
+    if word_count<1024:
+        number_extract = math.ceil(sent_count*0.8)
+    elif word_count>1024 and word_count<1800:
+        number_extract = math.ceil(sent_count*0.6)
+    else:
+        number_extract = math.ceil(sent_count*0.4)
+
+    kmeans = KMeans(n_clusters=number_extract, 
+                    random_state=0).fit(sentence_features)
+    cluster_center = kmeans.cluster_centers_
+
+    nbrs = NearestNeighbors(n_neighbors= 1, 
+                        algorithm='brute').fit(sentence_features)
+    distances, indices = nbrs.kneighbors(
+                    cluster_center.reshape(number_extract,-1))
+
+    indices = np.sort(indices.reshape(1,-1))
+    for i in indices[0]:
+        topic_answer.append(paragraph_split[i])
     return topic_answer
 
 def abstractive_sum(text):
@@ -65,7 +79,7 @@ def abstractive_sum(text):
     summaries = model.generate(
         input_ids=input_ids['input_ids'],
         attention_mask=input_ids['attention_mask'],
-        max_length=512
+        max_length=512,
         min_length=256
     )
     decoded_summaries = [tokenizer.decode(s, skip_special_tokens=True, clean_up_tokenization_spaces=True) for s in summaries]

@@ -10,3 +10,5 @@ model/*
 slidegen/__pycache__
 app/__pycache__
 /slidev
+
+*/__pycache__

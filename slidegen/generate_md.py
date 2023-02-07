@@ -1,7 +1,7 @@
 import os
 
 def create_markdown(doc):
-    noOfSLides = len(doc['slides'])
+    noOfSLides = len(doc['summary'])
 
     print("doc is :::\n", doc)
     # Create a markdown object
@@ -19,7 +19,7 @@ def create_markdown(doc):
 
 def create_home_slide(doc):
     # Create a home slide
-    text = "\n# " + doc['title'] + "\n" + doc['subtitle'] + "\n"
+    text = "\n# " + doc['title'] + "\n" + doc['author'][0] + "\n---\n"
     text += """<div class="pt-12">
         <span @click="$slidev.nav.next" class="px-2 py-1 rounded cursor-pointer" hover="bg-white bg-opacity-10">
             <carbon:arrow-right class="inline"/>
@@ -35,18 +35,25 @@ def create_home_slide(doc):
         </div>
 ---
     """
+    if doc['bgimage'] != '':
+        text += """
+        ---
+            \n![Remote Image]({})\n
+        ---
+        """.format(doc['bgimage'])
     return text
+
 
 def create_new_slide(doc,slideNum):
     # Create a new slide
-    contents = doc['slides'][slideNum]
-    totalSlides = len(doc['slides'])
+    contents = doc['summary'][slideNum]
+    totalSlides = len(doc['summary'])
 
     # print (contents)
     text = ''
 
     # adding the title
-    titles = list(doc['slides'].keys())
+    titles = list(doc['summary'].keys())
     text += "\n# " + str(titles[slideNum]) + "\n"
 
     # adding the bullet points

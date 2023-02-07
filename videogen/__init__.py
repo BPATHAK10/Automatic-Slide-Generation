@@ -14,25 +14,25 @@ pdf_path = "slidev/slides-export.pdf"
 output_path = "output.mp4"
 
 def generate_video(content):
-    temp_path = tempfile.TemporaryDirectory()
-    images_from_path = convert_from_path(pdf_path)
-    for i, image in enumerate(images_from_path):
-        image_path = os.path.join(temp_path, 'frame_{}.jpg'.format(i))
-        audio_path = os.path.join(temp_path, 'frame_{}.mp3'.format(i))
-        image.save(image_path)
-        if (i==0):
-            #The empty spaces for pause
-            speaker_notes = content["title"] + '      ' + content["subtitle"]
-        else:
-            speaker_notes = ' '.join(content["selected_sentences"][i-1])
+    with tempfile.TemporaryDirectory() as temp_path:
+        images_from_path = convert_from_path(pdf_path)
+        for i, image in enumerate(images_from_path):
+            image_path = os.path.join(temp_path, 'frame_{}.jpg'.format(i))
+            audio_path = os.path.join(temp_path, 'frame_{}.mp3'.format(i))
+            image.save(image_path)
+            if (i==0):
+                #The empty spaces for pause
+                speaker_notes = content["title"] + ' the author of the article is:' + content["author"][0]
+            else:
+                speaker_notes = ' '.join(content["summary"][i-1])
 
-        generate_audio_from_text(speaker_notes, audio_path)
-        generate_video_from_image(image_path, audio_path, temp_path, i)
+            generate_audio_from_text(speaker_notes, audio_path)
+            generate_video_from_image(image_path, audio_path, temp_path, i)
 
-    video_list = [os.path.join(temp_path, 'frame_{}.ts'.format(i)) \
-                    for i in range(len(images_from_path))]
-    video_list_str = 'concat:' + '|'.join(video_list)
-    ffmpeg_concat(video_list_str, output_path)
+        video_list = [os.path.join(temp_path, 'frame_{}.ts'.format(i)) \
+                        for i in range(len(images_from_path))]
+        video_list_str = 'concat:' + '|'.join(video_list)
+        ffmpeg_concat(video_list_str, output_path)
 
 def ffmpeg_concat(video_list_str, out_path):
     call([FFMPEG_NAME, '-y', '-f', 'mpegts', '-i', '{}'.format(video_list_str),
