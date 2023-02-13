@@ -8,6 +8,7 @@ model/*
 !/model/pipeline.py
 
 */__pycache__
+package-lock.json
 
 .env
 
