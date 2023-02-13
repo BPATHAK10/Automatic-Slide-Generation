@@ -40,7 +40,6 @@ def extractive_sum(text):
     encoder_output = outputs.encoder_last_hidden_state
     sentence_features = encoder_output[:,0,:].detach().numpy()
 
-    paragraph_split = sent_tokenize(text)
     sent_count = len(paragraph_split)
 
     topic_answer = []
@@ -92,7 +91,7 @@ def summarize(text):
     sentences = sent_tokenize(abstractive_answer[0])
     num_of_sents = len(sentences)
     generated_sentences = {}
-    sent_per_slide = 4
+    sent_per_slide = 3
     num_of_slides = math.ceil(num_of_sents/sent_per_slide)
     k=0
     for i in range(num_of_slides):

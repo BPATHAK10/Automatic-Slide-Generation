@@ -7,10 +7,13 @@ model/*
 !/model/__init__.py
 !/model/pipeline.py
 
-slidegen/__pycache__
-app/__pycache__
-/slidev
-
 */__pycache__
+
+.env
+
+marp
+marp.exe
+
+output.md
+output.pdf
 output.mp4
-configfile.ini

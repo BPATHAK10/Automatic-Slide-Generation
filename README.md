@@ -5,6 +5,6 @@ Then `pip install -r requirements.txt` \n
 Finally hit `python main.py` and run the api
 
 Other requirements:
-slidev
-poppler-utils
+marp-cli
+poppler-utils 
 ffmpeg
