@@ -3,6 +3,8 @@ from flask import Flask, render_template, url_for, request
 import slidegen as slidegen
 import model.pipeline as pipeline # model\pipeline.py
 import videogen as videogen
+import preprocess as preprocess
+import datetime
 
 
 import json
@@ -20,46 +22,62 @@ def home():
 	return jsonify({'message': 'Welcome to the SlideIt-API'})
 
 
-@app.route('/predict', methods=['POST', 'GET'])
-def predict():
+@app.route('/predict_text', methods=['POST', 'GET'])
+def predict_text():
 
 	if request.method == 'POST':
 		# extract the prediction from the model
 		print ("hello")
 		request_data = json.loads(request.data.decode('utf-8'))
 		raw_data = request_data['data']
-
-		slides_with_sentences = pipeline.summarize(raw_data)
-
-		# selected_sentences = {
-		# 	0: ["After Tesla and SpaceX CEO Elon Musk took ownership of Twitter last week, the social networking giant embarked on a steep reduction in its workforce.", 
-		# 			"The cuts affected a total of 983 employees in California, its home state, according to three letters of notice that the company sent to regional authorities, which were obtained by CNBC.",
-		# 			"The company’s new owner, CEO and sole director Musk, wrote in a tweet on Friday afternoon, “Regarding Twitter’s reduction in force, unfortunately there is no choice when the company is losing over $4M/day.",
-		# 			"Everyone exited was offered 3 months of severance, which is 50% more than legally required.”"
-		# 			],
-		# 	1: ["The cuts affected a total of 983 employees in California, its home state, according to three letters of notice that the company sent to regional authorities, which were obtained by CNBC.",
-		# 			"The company’s new owner, CEO and sole director Musk, wrote in a tweet on Friday afternoon",
-		# 			"Everyone exited was offered 3 months of severance, which is 50% more than legally required.”",
-		# 			"Twitter’s reduction in force extended beyond California, and CNBC could not immediately confirm whether Musk’s description is accurate."
-		# 			],
-		# 	2: ["The company’s new owner, CEO and sole director Musk, wrote in a tweet on Friday afternoon, “Regarding Twitter’s reduction in force, unfortunately there is no choice when the company is losing over $4M/day.",
-		# 			"Everyone exited was offered 3 months of severance, which is 50% more than legally required.",
-		# 			"Twitter’s reduction in force extended beyond California, and CNBC could not immediately confirm whether Musk’s description is accurate."],
-		# }
-
-		presentationContent = {
-			"title": "The Home Title Page",
-			"subtitle": "This area denotes the subtitle of the topic",
-			"slides": slides_with_sentences,
-		}
-
-		slidegen.generateSlides(presentationContent)
-		videogen.generate_video(presentationContent)
-		
+		document = preprocess.parseUrl(raw_data)
+		document['summary'] = pipeline.summarize(document['text'])
+		slidegen.generateSlides(document)
+		videogen.generate_video(document)
+				
 		return jsonify({'message': "you now get the pdf and output video"})
 
 	if request.method == 'GET':
 		return jsonify({'message': 'Please use the POST method'})	
+
+@app.route('/predict_url', methods=['POST', 'GET'])
+def predict_url():
+
+	if request.method == 'POST':
+		# extract the prediction from the model
+		request_data = json.loads(request.data.decode('utf-8'))
+		raw_data = request_data['url']
+		document = preprocess.parseUrl(raw_data)
+		print (document['text'])
+		document['summary'] = pipeline.summarize(document['text'])
+		slidegen.generateSlides(document)
+		videogen.generate_video(document)
+				
+		return jsonify({'message': "you now get the pdf and output video"})
+
+	if request.method == 'GET':
+		return jsonify({'message': 'Please use the POST method'})	
+
+@app.route('/predict_upload', methods=['POST', 'GET'])
+def predict_upload():
+
+	if request.method == 'POST':
+		# extract the prediction from the model
+		print ("hello")
+		request_data = json.loads(request.data.decode('utf-8'))
+		raw_data = request_data['upload']
+		document = preprocess.parseUpload(raw_data)
+		document['summary'] = pipeline.summarize(document['text'])
+		slidegen.generateSlides(document)
+		videogen.generate_video(document)
+				
+		return jsonify({'message': "you now get the pdf and output video"})
+
+	if request.method == 'GET':
+		return jsonify({'message': 'Please use the POST method'})	
+
+
+
 
 
 test_text = """After Tesla and SpaceX CEO Elon Musk took ownership of Twitter last week, the social networking giant embarked on a steep reduction in its workforce. The cuts affected a total of 983 employees in California, its home state, according to three letters of notice that the company sent to regional authorities, which were obtained by CNBC.

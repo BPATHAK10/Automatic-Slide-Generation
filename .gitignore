@@ -11,4 +11,6 @@ slidegen/__pycache__
 app/__pycache__
 /slidev
 
-videogen/__pycache__
+*/__pycache__
+output.mp4
+configfile.ini

@@ -6,7 +6,7 @@ def generateSlides(doc):
     # Create a markdown object
     md = create_markdown(doc)
     # Create a pdf object
-    print (md)
+    # print (md)
     f = open('slidev/slides.md', 'w')
     f.write(md)
     f.close()
