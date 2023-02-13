@@ -12,3 +12,5 @@ app/__pycache__
 /slidev
 
 */__pycache__
+output.mp4
+configfile.ini

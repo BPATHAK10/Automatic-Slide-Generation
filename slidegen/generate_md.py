@@ -3,7 +3,7 @@ import os
 def create_markdown(doc):
     noOfSLides = len(doc['summary'])
 
-    print("doc is :::\n", doc)
+    # print("doc is :::\n", doc)
     # Create a markdown object
     md = """"""
     f = open("slidegen/theme_data.md", "r")

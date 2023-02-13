@@ -7,6 +7,7 @@ def parseUrl(url):
     article.download()
     article.parse()
     
+    # print (article.)
     document = {
         'title': article.title,
         'author': article.authors,
