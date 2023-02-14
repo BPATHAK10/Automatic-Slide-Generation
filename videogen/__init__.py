@@ -43,17 +43,17 @@ def generate_video_from_image(image_path, audio_path, temp_path, i):
     out_path_mp4 = os.path.join(temp_path, 'frame_{}.mp4'.format(i))
     out_path_ts = os.path.join(temp_path, 'frame_{}.ts'.format(i))
     call([FFMPEG_NAME, '-loop', '1', '-y', '-i', image_path, '-i', audio_path,
-          '-c:v', 'libx264', '-tune', 'stillimage', '-c:a', 'aac',
-          '-b:a', '192k', '-pix_fmt', 'yuv420p', '-shortest', out_path_mp4])
+        '-c:v', 'libx264', '-tune', 'stillimage', '-c:a', 'aac',
+        '-b:a', '192k', '-pix_fmt', 'yuv420p', '-shortest', '-vf', 'scale=w=trunc(iw/2)*2:h=trunc(ih/2)*2', out_path_mp4])
     call([FFMPEG_NAME, '-y', '-i', out_path_mp4, '-c', 'copy',
-          '-bsf:v', 'h264_mp4toannexb', '-f', 'mpegts', out_path_ts])
+        '-bsf:v', 'h264_mp4toannexb', '-f', 'mpegts', out_path_ts])
 
 def generate_video(content):
     with tempfile.TemporaryDirectory() as temp_path:
         images_from_path = convert_from_path(pdf_path)
         for i, image in enumerate(images_from_path):
             image_path = os.path.join(temp_path, 'frame_{}.jpg'.format(i))
-            audio_path = os.path.join(temp_path, 'frame_{}.mp3'.format(i))
+            audio_path = os.path.join(temp_path, 'frame_{}.wav'.format(i))
             image.save(image_path)
             if (i==0):
                 #The empty spaces for pause
@@ -61,7 +61,7 @@ def generate_video(content):
             elif (i==1):
                 speaker_notes = 'This is the image representing the ' + content["title"] + 'article'
             else:
-                speaker_notes = ' '.join(content["summary"][i-1])
+                speaker_notes = ' '.join(content["summary"][i-2])
 
             generate_audio_from_text(speaker_notes, audio_path)
             generate_video_from_image(image_path, audio_path, temp_path, i)
