@@ -6,7 +6,6 @@ import videogen as videogen
 import preprocess as preprocess
 import datetime
 
-
 import json
 from flask import jsonify
 from app import app
@@ -30,7 +29,7 @@ def predict_text():
 		print ("hello")
 		request_data = json.loads(request.data.decode('utf-8'))
 		raw_data = request_data['data']
-		document = preprocess.parseUrl(raw_data)
+		document = preprocess.parseText(raw_data)
 		document['summary'] = pipeline.summarize(document['text'])
 		slidegen.generateSlides(document)
 		videogen.generate_video(document)
@@ -48,7 +47,7 @@ def predict_url():
 		request_data = json.loads(request.data.decode('utf-8'))
 		raw_data = request_data['url']
 		document = preprocess.parseUrl(raw_data)
-		print (document['text'])
+		# print (document['text'])
 		document['summary'] = pipeline.summarize(document['text'])
 		slidegen.generateSlides(document)
 		videogen.generate_video(document)
