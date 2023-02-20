@@ -47,4 +47,4 @@ def generateSlides(doc):
     f.close()
     #marp should have executable permissions
     print ("hello from md")
-    os.system('marp output.md --pdf')
+    os.system('./marp output.md --pdf')

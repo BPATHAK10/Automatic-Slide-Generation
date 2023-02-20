@@ -35,10 +35,14 @@ def parseText(text):
     return document
 
 def parseUpload(upload):
+
+    # combine all the text of the upload dict in one string
+    upload = ' '.join(upload.values())
+
     document = {
         'title': 'Title Page',
         'author': 'Aagat Pokhrel',
-        'date': datetime.utcnow().date().isoformat(),
+        # 'date': datetime.utcnow().date().isoformat(),
         'text': upload,
         'bgimage': None, 
         'images': [],

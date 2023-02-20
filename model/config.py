@@ -13,4 +13,6 @@ model = model_class.from_pretrained(pretrained_weights)
 
 #We used the BART  make life easier and fun
 
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+# device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
+device = torch.device("cpu")

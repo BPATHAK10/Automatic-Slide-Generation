@@ -3,7 +3,7 @@ import tempfile
 from subprocess import call
 
 from pdf2image import convert_from_path
-import azure.cognitiveservices.speech as speechsdk
+# import azure.cognitiveservices.speech as speechsdk
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -11,10 +11,10 @@ load_dotenv()
 speech_key = os.getenv('SPEECH_KEY')
 service_region = os.getenv('SERVICE_REGION')
 
-speech_config = speechsdk.SpeechConfig(subscription=speech_key, region=service_region)
+# speech_config = speechsdk.SpeechConfig(subscription=speech_key, region=service_region)
 
-speech_config.speech_synthesis_voice_name = "en-US-AriaNeural"
-speech_synthesizer = speechsdk.SpeechSynthesizer(speech_config=speech_config)
+# speech_config.speech_synthesis_voice_name = "en-US-AriaNeural"
+# speech_synthesizer = speechsdk.SpeechSynthesizer(speech_config=speech_config)
 
 __author__ = ['slideit']
 
@@ -28,15 +28,15 @@ def concat_audio_video(video_list_str, out_path):
     call([FFMPEG_NAME, '-y', '-f', 'mpegts', '-i', '{}'.format(video_list_str),
           '-c', 'copy', '-bsf:a', 'aac_adtstoasc', out_path])
 
-def generate_audio_from_text(text, audio_path):
-    result = speech_synthesizer.speak_text_async(text).get()
-    if result.reason == speechsdk.ResultReason.SynthesizingAudioCompleted:
-        # Saves the audio data to a WAV file
-        with open(audio_path, "wb") as wav_file:
-            wav_file.write(result.audio_data)
-        print("Speech synthesized to wave file successfully")
-    else:
-        print("Error synthesizing speech: {}".format(result.reason))
+# def generate_audio_from_text(text, audio_path):
+#     result = speech_synthesizer.speak_text_async(text).get()
+#     if result.reason == speechsdk.ResultReason.SynthesizingAudioCompleted:
+#         # Saves the audio data to a WAV file
+#         with open(audio_path, "wb") as wav_file:
+#             wav_file.write(result.audio_data)
+#         print("Speech synthesized to wave file successfully")
+#     else:
+#         print("Error synthesizing speech: {}".format(result.reason))
 
 
 def generate_video_from_image(image_path, audio_path, temp_path, i):
@@ -63,7 +63,7 @@ def generate_video(content):
             else:
                 speaker_notes = ' '.join(content["summary"][i-2])
 
-            generate_audio_from_text(speaker_notes, audio_path)
+            # generate_audio_from_text(speaker_notes, audio_path)
             generate_video_from_image(image_path, audio_path, temp_path, i)
 
         video_list = [os.path.join(temp_path, 'frame_{}.ts'.format(i)) \
