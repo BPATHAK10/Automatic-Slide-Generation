@@ -1,7 +1,7 @@
 from flask import Flask, render_template, url_for, request
 # import pandas as pd
 import slidegen as slidegen
-# import model.pipeline as pipeline # model\pipeline.py
+import model.pipeline as pipeline # model\pipeline.py
 import videogen as videogen
 import preprocess as preprocess
 import datetime
@@ -30,12 +30,14 @@ def predict_text():
 		print ("hello")
 		request_data = json.loads(request.data.decode('utf-8'))
 		raw_data = request_data['data']
-		document = preprocess.parseUrl(raw_data)
-		# document['summary'] = pipeline.summarize(document['text'])
+		document = preprocess.parseText(raw_data)
+		document['summary'] = pipeline.summarize(document['text'])
 		slidegen.generateSlides(document)
 		videogen.generate_video(document)
 				
-		return jsonify({'message': "you now get the pdf and output video"})
+		file_link = drive_interaction.uploadFiles()
+
+		return jsonify({'message': "you now get the pdf and output video", "link": file_link})
 
 	if request.method == 'GET':
 		return jsonify({'message': 'Please use the POST method'})	
@@ -48,16 +50,13 @@ def predict_url():
 		request_data = json.loads(request.data.decode('utf-8'))
 		raw_data = request_data['url']
 		document = preprocess.parseUrl(raw_data)
-		# print (document['text'])
-		print("text is here")
-		# document['summary'] = pipeline.summarize(document['text'])
-		print("summary is here")
+		document['summary'] = pipeline.summarize(document['text'])
 		slidegen.generateSlides(document)
-		print("slides are here")
 		videogen.generate_video(document)
-		print("video is here")
 				
-		return jsonify({'message': "you now get the pdf and output video"})
+		file_link = drive_interaction.uploadFiles()
+
+		return jsonify({'message': "you now get the pdf and output video", "link": file_link})
 
 	if request.method == 'GET':
 		return jsonify({'message': 'Please use the POST method'})	
@@ -67,16 +66,14 @@ def predict_upload():
 
 	if request.method == 'POST':
 		# extract the prediction from the model
-		# print ("hello")
 		request_data = json.loads(request.data.decode('utf-8'))
 		raw_data = request_data['upload']
 		document = preprocess.parseUpload(raw_data)
-		print(document)
-		# document['summary'] = pipeline.summarize(document['text'])
-		# slidegen.generateSlides(document)
-		# videogen.generate_video(document)
+		document['summary'] = pipeline.summarize(document['text'])
+		slidegen.generateSlides(document)
+		videogen.generate_video(document)
 
-
+		# upload the generated files to google drive
 		file_link = drive_interaction.uploadFiles()
 				
 		return jsonify({'message': "you now get the pdf and output video", "link": file_link})
