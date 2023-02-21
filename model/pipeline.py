@@ -89,12 +89,22 @@ def abstractive_sum(text):
         return_tensors='pt'
     ).to(device)
 
+    ## -- For CPU --## 
     summaries = model.generate(
         input_ids=input_ids['input_ids'],
         attention_mask=input_ids['attention_mask'],
         max_length=200,
         min_length=100
     )
+
+    ## -- For GPU --##
+    # summaries = model.cuda().generate(
+    # input_ids=input_ids['input_ids'],
+    #    attention_mask=input_ids['attention_mask'],
+    #    max_length=200,
+    #    min_length=100
+    #)
+
     decoded_summaries = [tokenizer.decode(s, skip_special_tokens=True, clean_up_tokenization_spaces=True) for s in summaries]
     return decoded_summaries[0]
 
