@@ -46,7 +46,9 @@ def parse_text(text):
 
 def parse_upload(upload):
 
-    # upload = docx2txt.process(upload)
+    # combine all the text of the upload dict in one string
+    upload = ' '.join(upload.values())
+
     document = {
         'title': 'Title Page',
         'author': 'Aagat Pokhrel',

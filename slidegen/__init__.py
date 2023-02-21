@@ -47,5 +47,9 @@ def create_slides(document):
     f.close()
     #marp should have executable permissions
     os.system('marp output.md --pdf')
+    #other commit was
+    #os.system('./marp output.md --pdf')
     convert_to_frames()
+
+    
 

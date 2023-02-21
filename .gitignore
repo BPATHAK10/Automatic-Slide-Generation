@@ -19,3 +19,6 @@ output/
 output.md
 output.pdf
 output.mp4
+
+credential.json
+token.json
