@@ -1,50 +1,51 @@
 import os
+from pdf2image import convert_from_path
 
-def create_markdown(doc):
-    noOfSLides = len(doc['summary'])
+image_loc= 'output/images'
 
+def create_markdown(document):
     md = """"""
     f = open("slidegen/theme.md", "r")
     atext = f.read()
     f.close()
     md += atext+"\n"
-    md += create_home_slide(doc)
+    md += create_home_slide(document)
 
-    for i in range(noOfSLides):
-        md += create_new_slide(doc,i)
+    for i, (topic, content) in enumerate(document['slides'].items()):
+        for num, sentences in content.items():
+            md += create_new_slide(topic,sentences)
 
     return md
 
-def create_home_slide(doc):
+def create_home_slide(document):
     # Create a home slide
-    text = "\n# " + doc['title'] + "\n" + doc['author'][0] + "\n\n"
-    if doc['bgimage'] != '':
-        text += "---\n![bg]({})\n".format(doc['bgimage'])
+    text = "\n# " + document['title'] + "\n" + document['author'][0] + "\n\n"
+    if document['image'] != '':
+        text += "---\n![bg]({})\n".format(document['image'])
     return text
 
 
-def create_new_slide(doc,slideNum):
-    # Create a new slide
-    contents = doc['summary'][slideNum]
-    text = ''
-
-    # adding the title
-    titles = list(doc['summary'].keys())
-    text += "\n---\n# " + str(titles[slideNum]) + "\n"
-
+def create_new_slide(topic,content):
+    text = "\n---\n# " + topic + "\n"
     # adding the bullet points
-    for content in contents:
-        text += "\n- " + content + "\n"
-
+    for sentence in content:
+        text += "\n- " + sentence + "\n"
     return text
 
-def generateSlides(doc):
-    print ("generating slides...")
-    # Create a markdown object
-    md = create_markdown(doc)
+def convert_to_frames():
+    # Convert the pdf to frames
+    images_from_path = convert_from_path('output.pdf')
+    for i, image in enumerate(images_from_path):
+        image_path = os.path.join(image_loc, 'frame_{}.jpg'.format(i))
+        image.save(image_path)
+
+def create_slides(document):
+    os.mkdir(image_loc)
+    md = create_markdown(document)
     f = open('output.md', 'w')
     f.write(md)
     f.close()
     #marp should have executable permissions
-    print ("hello from md")
     os.system('marp output.md --pdf')
+    convert_to_frames()
+

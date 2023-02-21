@@ -15,6 +15,7 @@ package-lock.json
 marp
 marp.exe
 
+output/
 output.md
 output.pdf
 output.mp4

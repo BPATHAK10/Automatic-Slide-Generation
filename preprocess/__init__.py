@@ -23,10 +23,10 @@ def parseUrl(url):
         'author': article.authors,
         'date': article.publish_date,
         'text': article.text,
-        'bgimage': article.top_image, 
+        'image': article.top_image, 
         'images': article.images,
         'html': article.html,
-        'summary': {},
+        'slides': {},
     }
 
     return document
@@ -37,10 +37,10 @@ def parseText(text):
         'author': 'Aagat Pokhrel',
         'date': datetime.utcnow().date().isoformat().strftime("%Y-%m-%d"),
         'text': text,
-        'bgimage': None, 
+        'image': None, 
         'images': [],
         'html': None,
-        'summary': {},
+        'slides': {},
     }
     return document
 
@@ -52,9 +52,9 @@ def parseUpload(upload):
         'author': 'Aagat Pokhrel',
         'date': datetime.utcnow().date().isoformat().strftime("%Y-%m-%d"),
         'text': upload,
-        'bgimage': None, 
+        'image': None, 
         'images': [],
         'html': None,
-        'summary': {},
+        'slides': {},
     }
     return document
