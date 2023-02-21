@@ -2,7 +2,7 @@ from newspaper import Article
 from datetime import datetime
 import docx2txt
 
-def parseUrl(url):
+def parse_url(url):
     article = Article(url)
     article.download()
     article.parse()
@@ -31,7 +31,7 @@ def parseUrl(url):
 
     return document
 
-def parseText(text):
+def parse_text(text):
     document = {
         'title': 'Title Page',
         'author': 'Aagat Pokhrel',
@@ -44,7 +44,7 @@ def parseText(text):
     }
     return document
 
-def parseUpload(upload):
+def parse_upload(upload):
 
     # upload = docx2txt.process(upload)
     document = {

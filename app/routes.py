@@ -5,7 +5,7 @@ import videogen as videogen
 import slidegen as slidegen
 import audiogen as audiogen
 
-import preprocess as preprocess
+import parsing as parsing
 import datetime
 
 import shutil
@@ -20,6 +20,8 @@ def execute_pipeline(document):
 	os.mkdir('output')
 	print (document['text'])
 	document['slides'] = pipeline.get_slide_content(document['text'])
+
+	#mutithreading can be used here
 	slidegen.create_slides(document)
 	audiogen.synthesize_audio(document)
 
@@ -44,7 +46,7 @@ def predict_text():
 		# extract the prediction from the model
 		request_data = json.loads(request.data.decode('utf-8'))
 		raw_data = request_data['data']
-		document = preprocess.parseText(raw_data)
+		document = parsing.parse_text(raw_data)
 		execute_pipeline(document)
 		return jsonify({'message': "you now get the pdf and output video"})
 
@@ -58,7 +60,7 @@ def predict_url():
 		# extract the prediction from the model
 		request_data = json.loads(request.data.decode('utf-8'))
 		raw_data = request_data['url']
-		document = preprocess.parseUrl(raw_data)
+		document = parsing.parse_url(raw_data)
 		execute_pipeline(document)				
 		return jsonify({'message': "you now get the pdf and output video"})
 
@@ -73,7 +75,7 @@ def predict_upload():
 		print ("hello")
 		request_data = json.loads(request.data.decode('utf-8'))
 		raw_data = request_data['upload']
-		document = preprocess.parseUpload(raw_data)
+		document = parsing.parse_upload(raw_data)
 		execute_pipeline(document)			
 		return jsonify({'message': "you now get the pdf and output video"})
 
