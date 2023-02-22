@@ -9,4 +9,4 @@ paginate: false
 
 ---
 
-<!-- class:lead -->
+<!-- _class:lead -->

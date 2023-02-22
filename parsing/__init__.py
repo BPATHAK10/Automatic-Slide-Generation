@@ -17,7 +17,8 @@ def parse_url(url):
     if article.text is None:
         article.text = 'No Text'
 
-      
+    article.text = article.text.replace('’', "'").replace('—', '-')
+    
     document = {
         'title': article.title,
         'author': article.authors,
@@ -27,6 +28,7 @@ def parse_url(url):
         'images': article.images,
         'html': article.html,
         'slides': {},
+        'no_of_slides': 0,
     }
 
     return document
@@ -41,6 +43,7 @@ def parse_text(text):
         'images': [],
         'html': None,
         'slides': {},
+        'no_of_slides': 0,
     }
     return document
 
@@ -58,5 +61,6 @@ def parse_upload(upload):
         'images': [],
         'html': None,
         'slides': {},
+        'no_of_slides': 0,
     }
     return document

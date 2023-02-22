@@ -18,14 +18,15 @@ from flask import Response
 
 def execute_pipeline(document):
 	os.mkdir('output')
-	print (document['text'])
-	document['slides'] = pipeline.get_slide_content(document['text'])
+	# print (document['text'])
+	document['no_of_slides'], document['slides'] = pipeline.get_slide_content(document['text'])
 
+	# print (document)
 	#mutithreading can be used here
 	slidegen.create_slides(document)
 	audiogen.synthesize_audio(document)
 
-	number_of_slides = len(document['slides'])+2
+	number_of_slides = len(document['no_of_slides'])+2 #the first two slides
 	videogen.generate_video(number_of_slides)
 	shutil.rmtree('output', ignore_errors=True)
 

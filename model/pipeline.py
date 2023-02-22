@@ -60,7 +60,6 @@ def clustering(text, features, number_extract=3):
         cluster_space.setdefault(i, []).append(j)
         feature_space.setdefault(i, []).append(features[k]) #this might be the culprit
     cluster_centers = kmeans.cluster_centers_
-    print (cluster_space)
     return cluster_space, feature_space, cluster_centers
 
 def extractive_sum(cluster_center, sentence_list, feature_list):
@@ -112,6 +111,7 @@ def get_slide_content(text):
     topics = ['Background', 'Details', 'Conclusion']
     sent_per_slide = 3
     slide_content = {'Background': None, 'Details': None, 'Conclusion': None}
+    total_slides = 0
 
     sentence_features = get_sentence_features(text)
     cluster_space, feature_space, cluster_centers = clustering(text, sentence_features)
@@ -128,4 +128,6 @@ def get_slide_content(text):
             k=k+sent_per_slide
 
         slide_content[topics[label]] = section_slides
-    return slide_content
+        total_slides += num_of_slides
+
+    return total_slides, slide_content
