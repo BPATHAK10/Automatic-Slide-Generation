@@ -17,7 +17,8 @@ def parse_url(url):
     if article.text is None:
         article.text = 'No Text'
 
-    article.text = article.text.replace('’', "'").replace('—', '-')
+    translation_table = dict.fromkeys(map(ord, '’—“”…‘'), None)
+    article.text = article.text.translate(translation_table)
     
     document = {
         'title': article.title,
@@ -34,10 +35,12 @@ def parse_url(url):
     return document
 
 def parse_text(text):
+
+
     document = {
         'title': 'Title Page',
         'author': 'Aagat Pokhrel',
-        'date': datetime.utcnow().date().isoformat().strftime("%Y-%m-%d"),
+        'date': None,
         'text': text,
         'image': None, 
         'images': [],
@@ -55,7 +58,7 @@ def parse_upload(upload):
     document = {
         'title': 'Title Page',
         'author': 'Aagat Pokhrel',
-        'date': datetime.utcnow().date().isoformat().strftime("%Y-%m-%d"),
+        'date': None,
         'text': upload,
         'image': None, 
         'images': [],
