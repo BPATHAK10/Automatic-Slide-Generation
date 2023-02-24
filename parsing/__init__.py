@@ -7,16 +7,17 @@ def parse_url(url):
     article.download()
     article.parse()
     
+    if article.title  is None:
+        article.title = 'News Article'
     # print (article.)
-    if article.publish_date is None:
-        article.publish_date = datetime.utcnow().date().isoformat().strftime("%Y-%m-%d")
     
-    if article.authors is None:
-        article.authors.append('Aagat Pokhrel')
+    if len(article.authors) == 0:
+        article.authors.append('Anonymous Author')
     
     if article.text is None:
         article.text = 'No Text'
 
+    # remove all the special characters not recognized by the utf-8
     translation_table = dict.fromkeys(map(ord, '’—“”…‘'), None)
     article.text = article.text.translate(translation_table)
     
@@ -38,8 +39,8 @@ def parse_text(text):
 
 
     document = {
-        'title': 'Title Page',
-        'author': 'Aagat Pokhrel',
+        'title': 'Article',
+        'author': ['Anonymous Author'],
         'date': None,
         'text': text,
         'image': None, 
@@ -56,8 +57,8 @@ def parse_upload(upload):
     upload = ' '.join(upload.values())
 
     document = {
-        'title': 'Title Page',
-        'author': 'Aagat Pokhrel',
+        'title': 'Article',
+        'author': ['Anonymous Author'],
         'date': None,
         'text': upload,
         'image': None, 

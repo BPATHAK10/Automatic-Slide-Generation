@@ -25,9 +25,9 @@ def generate_audio_from_text(text, audio_path):
 
 def generate_for_home(document):
     speaker_notes = document["title"] + ' the author of the article is:' + document["author"][0]
-    generate_audio_from_text(speaker_notes, os.path.join(audio_loc, 'frame_1.wav'))
+    generate_audio_from_text(speaker_notes, os.path.join(audio_loc, 'frame_0.wav'))
     speaker_notes = 'This is the image representing the ' + document["title"] + 'article'
-    generate_audio_from_text(speaker_notes, os.path.join(audio_loc, 'frame_2.wav'))
+    generate_audio_from_text(speaker_notes, os.path.join(audio_loc, 'frame_1.wav'))
 
 def synthesize_audio(document):
     os.mkdir(audio_loc)

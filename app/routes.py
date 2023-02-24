@@ -28,6 +28,7 @@ def execute_pipeline(document):
 
 	number_of_slides = document['no_of_slides']+2 #the first two slides
 	videogen.generate_video(number_of_slides)
+	print (number_of_slides)
 	shutil.rmtree('output', ignore_errors=True)
 
 @app.before_request
