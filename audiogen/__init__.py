@@ -31,9 +31,11 @@ def generate_for_home(document):
 
 def synthesize_audio(document):
     os.mkdir(audio_loc)
-    generate_for_home(document)                             
-    for i, (topic, contents) in enumerate(document['slides'].items()):
+    generate_for_home(document)
+    k=0                             
+    for topic, contents in document['slides'].items():
         for num, sentences in contents.items():
             speaker_notes = ''.join(sentences)
-            audio_path = os.path.join(audio_loc, 'frame_{}.wav'.format(i+2))
+            audio_path = os.path.join(audio_loc, 'frame_{}.wav'.format(k+2))
             generate_audio_from_text(speaker_notes, audio_path)
+            k+=1
