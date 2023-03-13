@@ -1,13 +1,27 @@
 import nltk
 nltk.download('punkt')
+nltk.download('stopwords')
+from nltk.corpus import stopwords
 from nltk import sent_tokenize, word_tokenize
-import math
+import math, string
+import os
 
 from model.config import *
 import numpy as np
 from keras_preprocessing.sequence import pad_sequences
-from sklearn.cluster import KMeans
-from scipy.spatial.distance import cosine
+from sklearn_extra.cluster import KMedoids
+from sklearn.neighbors import NearestNeighbors
+from googleapiclient.discovery import build
+
+#load environment variables
+from dotenv import load_dotenv
+
+load_dotenv()
+
+api_key = os.getenv('SEARCH_KEY')
+cse_id = os.getenv('ENGINE_KEY')
+service = build("customsearch", "v1", developerKey=api_key)
+
 
 def create_attention_mask(input_ids):
   attention_masks = []
@@ -16,8 +30,7 @@ def create_attention_mask(input_ids):
     attention_masks.append(att_mask)  # basically attention_masks is a list of list
   return attention_masks
 
-def get_sentence_features(text):
-    paragraph_split = sent_tokenize(text)
+def get_sentence_features(paragraph_split):
     input_tokens = []
     for i in paragraph_split:
         input_tokens.append(tokenizer.encode(i, add_special_tokens=True))
@@ -50,60 +63,71 @@ def get_sentence_features(text):
 
     return sentence_features
 
-def clustering(text, features, number_extract=3):
-    text = sent_tokenize(text)
-    kmeans = KMeans(n_clusters=number_extract, 
-                    random_state=0).fit(features)
-    feature_space = {}
-    cluster_space = {}
-    for k, (i, j)  in enumerate(zip(kmeans.labels_, text)):
-        cluster_space.setdefault(i, []).append(j)
-        feature_space.setdefault(i, []).append(features[k]) #this might be the culprit
-    cluster_centers = kmeans.cluster_centers_
-    return cluster_space, feature_space, cluster_centers
+def clean_text(text):
 
-def extractive_sum(cluster_center, sentence_list, feature_list):
+    # Example text
+    words = word_tokenize(text)
+    table = str.maketrans('', '', string.punctuation)
+    stripped = [w.translate(table) for w in words]
+
+    # Remove stopwords from the list of words
+    stop_words = set(stopwords.words('english'))
+    filtered = [w for w in stripped if not w in stop_words]
+    return ' '.join(filtered)
+
+def extract_image(query):  
+    res = service.cse().list(q=query, cx=cse_id, searchType="image").execute()
+    img_url = res["items"][0]["link"]
+    return img_url
+
+def clustering(sentence_features, number_extract=3):
+    number_of_sent = len(sentence_features) if len(sentence_features) < 12 else 12
+    kmeds = KMedoids(n_clusters=number_extract, 
+                  random_state=0).fit(sentence_features)
+
+    cluster_center = kmeds.cluster_centers_
+    nbrs = NearestNeighbors(n_neighbors= number_of_sent, 
+        algorithm='brute').fit(sentence_features)
+    distances, indices = nbrs.kneighbors(
+    cluster_center)
+
+    return indices
+
+def extractive_sum(indices, paragraph_split, number_extract=3):
     # Extractive summarization
-    sentences = ''.join(sentence_list)
-    word_count = len(word_tokenize(sentences))
-    if (word_count < 400):
-        yank = 0.8
-    else:
-        yank = 400/word_count
+    num_of_sents = [8,12,6]
+    top_answer = []
+    extractive_sum = []
+    for i in range(number_extract):
+        top_answer.append(paragraph_split[indices[i][0]])
+        extractive_sum.append(list(map(lambda x: paragraph_split[x], np.sort(indices[i][:num_of_sents[i]]))))
+    return top_answer, extractive_sum
 
-    similarity_index = [cosine(cluster_center, sentence_feature) for sentence_feature in feature_list]
-    
-    ranked_sent = np.argsort(similarity_index)
-    extracted_sent = math.floor(yank * len(sentence_list))
-    ranked_and_yanked = ranked_sent[:extracted_sent]
-    new_sent = [sentence_list[i] for i in ranked_and_yanked]
-    sentences= ''.join(new_sent)
-    return sentences
-
-def abstractive_sum(text):
+def abstractive_sum(extract_sentences):
     # Abstractive summarization
+    text = ''.join(extract_sentences)
+    length_ =  len(word_tokenize(text)) + 20 # 20 extra
     input_ids = tokenizer(
-        text, max_length=400,
+        text, max_length=length_,
         truncation=True, padding='max_length',
         return_tensors='pt'
     ).to(device)
 
-    ## -- For CPU --## 
+    # -- for CPU -- #
     summaries = model.generate(
         input_ids=input_ids['input_ids'],
         attention_mask=input_ids['attention_mask'],
-        max_length=200,
-        min_length=100
+        max_length=math.ceil(length_/2+60),
+        min_length=math.floor(length_/2)
     )
 
-    ## -- For GPU --##
+    # # -- for GPU -- #
     # summaries = model.cuda().generate(
-    # input_ids=input_ids['input_ids'],
-    #    attention_mask=input_ids['attention_mask'],
-    #    max_length=200,
-    #    min_length=100
-    #)
-
+    #     input_ids=input_ids['input_ids'],
+    #     attention_mask=input_ids['attention_mask'],
+    #     max_length=math.ceil(length_/2+60),
+    #     min_length=math.floor(length_/2)
+    # )
     decoded_summaries = [tokenizer.decode(s, skip_special_tokens=True, clean_up_tokenization_spaces=True) for s in summaries]
     return decoded_summaries[0]
 
@@ -113,21 +137,32 @@ def get_slide_content(text):
     slide_content = {'Background': None, 'Details': None, 'Conclusion': None}
     total_slides = 0
 
-    sentence_features = get_sentence_features(text)
-    cluster_space, feature_space, cluster_centers = clustering(text, sentence_features)
+    paragraph_split = sent_tokenize(text)
+    sentence_features = get_sentence_features(paragraph_split)
 
-    for label, sentences in cluster_space.items():
-        extracted_text = extractive_sum(cluster_centers[label], sentences, feature_space[label])
-        abstractive_answer = abstractive_sum(extracted_text)
+    indices = clustering(sentence_features)    
+    top_answer, extractive_answer = extractive_sum(indices, paragraph_split)
+
+    for i, extract_sentences in enumerate(extractive_answer):
+        abstractive_answer = abstractive_sum(extract_sentences)
         sentences = sent_tokenize(abstractive_answer)
-        num_of_slides = math.ceil(len(sentences)/sent_per_slide)
+        num_of_slides = math.ceil((len(sentences)+1)/sent_per_slide)
         section_slides = {}
         k=0
-        for i in range(num_of_slides):
-            section_slides[i] = sentences[k:k+sent_per_slide]
-            k=k+sent_per_slide
-
-        slide_content[topics[label]] = section_slides
+        if (i==0):
+            for j in range(math.ceil(len(sentences)/sent_per_slide)):
+                section_slides[j] = sentences[k:k+sent_per_slide]
+                k=k+sent_per_slide
+        else:
+            section_slides[-1] = extract_image(clean_text(top_answer[i]))
+            for j in range(num_of_slides):
+                if (j==0):
+                    section_slides[j] = sentences[k:k+sent_per_slide-1]
+                    k=k+sent_per_slide-1
+                else:
+                    section_slides[j] = sentences[k:k+sent_per_slide]
+                    k=k+sent_per_slide
+        slide_content[topics[i]] = section_slides
         total_slides += num_of_slides
 
     return total_slides, slide_content

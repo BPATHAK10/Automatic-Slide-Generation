@@ -8,5 +8,4 @@ backgroundImage: url('https://marp.app/assets/hero-background.jpg')
 paginate: false
 
 ---
-
-<!-- _class:lead -->
+<!-- _class: lead -->

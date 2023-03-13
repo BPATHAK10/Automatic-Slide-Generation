@@ -12,8 +12,14 @@ def create_markdown(document):
     md += create_home_slide(document)
 
     for i, (topic, content) in enumerate(document['slides'].items()):
+        image_link = ''
         for num, sentences in content.items():
-            md += create_new_slide(topic,sentences)
+            if num == -1:
+                image_link = sentences
+            elif num==0 and i!=0:
+                md += create_first_slide(topic,sentences, image_link)
+            else: 
+                md += create_new_slide(topic,sentences)
 
     return md
 
@@ -24,6 +30,14 @@ def create_home_slide(document):
         text += "---\n![bg]({})\n".format(document['image'])
     return text
 
+def create_first_slide(topic,content,image_link): 
+
+    text = "\n---\n![bg right]({})".format(image_link)
+    text += "\n# " + topic + "\n"
+    # adding the bullet points
+    for sentence in content:
+        text += "\n- " + sentence + "\n"
+    return text
 
 def create_new_slide(topic,content):
     text = "\n---\n# " + topic + "\n"

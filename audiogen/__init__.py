@@ -8,6 +8,7 @@ speech_key = os.getenv('SPEECH_KEY')
 service_region = os.getenv('SERVICE_REGION')
 
 speech_config = speechsdk.SpeechConfig(subscription=speech_key, region=service_region)
+speech_config.set_speech_synthesis_output_format(speechsdk.SpeechSynthesisOutputFormat["Riff24Khz16BitMonoPcm"])
 
 audio_loc = 'output/audio'
 speech_config.speech_synthesis_voice_name = "en-US-AriaNeural"

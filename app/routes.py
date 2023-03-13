@@ -17,6 +17,12 @@ from app import app
 from flask import Response
 
 def execute_pipeline(document):
+
+	if os.path.exists('images'):
+		shutil.rmtree('images')
+	if os.path.exists('output'):
+		shutil.rmtree('output')
+	
 	os.mkdir('output')
 	document['no_of_slides'], document['slides'] = pipeline.get_slide_content(document['text'])
 
@@ -27,7 +33,9 @@ def execute_pipeline(document):
 
 	number_of_slides = document['no_of_slides']+2 #the first two slides
 	videogen.generate_video(number_of_slides)
+
 	shutil.rmtree('output', ignore_errors=True)
+	shutil.rmtree('images', ignore_errors=True)
 
 @app.before_request
 def basic_authentication():
