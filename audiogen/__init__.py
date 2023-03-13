@@ -27,7 +27,7 @@ def generate_audio_from_text(text, audio_path):
 def generate_for_home(document):
     speaker_notes = document["title"] + ' the author of the article is:' + document["author"][0]
     generate_audio_from_text(speaker_notes, os.path.join(audio_loc, 'frame_0.wav'))
-    speaker_notes = 'This is the image representing the ' + document["title"] + 'article'
+    speaker_notes = 'Here is the image for the article .                   .          .'
     generate_audio_from_text(speaker_notes, os.path.join(audio_loc, 'frame_1.wav'))
 
 def synthesize_audio(document):
@@ -36,7 +36,8 @@ def synthesize_audio(document):
     k=0                             
     for topic, contents in document['slides'].items():
         for num, sentences in contents.items():
-            speaker_notes = ''.join(sentences)
-            audio_path = os.path.join(audio_loc, 'frame_{}.wav'.format(k+2))
-            generate_audio_from_text(speaker_notes, audio_path)
-            k+=1
+            if num!=-1:
+                speaker_notes = ''.join(sentences)
+                audio_path = os.path.join(audio_loc, 'frame_{}.wav'.format(k+2))
+                generate_audio_from_text(speaker_notes, audio_path)
+                k+=1
