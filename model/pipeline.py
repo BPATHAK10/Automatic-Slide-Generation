@@ -151,11 +151,13 @@ def get_slide_content(text):
         k=0
         if (i==0):
             for j in range(math.ceil(len(sentences)/sent_per_slide)):
+                total_slides += 1
                 section_slides[j] = sentences[k:k+sent_per_slide]
                 k=k+sent_per_slide
         else:
             section_slides[-1] = extract_image(clean_text(top_answer[i]))
             for j in range(num_of_slides):
+                total_slides += 1
                 if (j==0):
                     section_slides[j] = sentences[k:k+sent_per_slide-1]
                     k=k+sent_per_slide-1
@@ -163,6 +165,5 @@ def get_slide_content(text):
                     section_slides[j] = sentences[k:k+sent_per_slide]
                     k=k+sent_per_slide
         slide_content[topics[i]] = section_slides
-        total_slides += num_of_slides
 
     return total_slides, slide_content
